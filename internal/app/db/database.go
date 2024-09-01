@@ -2,35 +2,48 @@ package db
 
 import (
 	"fmt"
+	"log"
 
 	_ "github.com/lib/pq"
 	"github.com/spf13/viper"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
 
-	"database/sql"
 	"martpedia-backend/internal/pkg/helper"
 	"time"
 )
 
-func NewDB() *sql.DB {
+func NewDB() *gorm.DB {
 	config := viper.New()
-	config.SetConfigFile("config.json")
+	config.SetConfigFile("D:/Project Golang/martpedia-backend/configs/config.json")
 	config.AddConfigPath(".")
 
+	log.Println("Attempting to read config file...")
+
 	err := config.ReadInConfig()
-	helper.PanicIfError(err)
+	if err != nil {
+		log.Fatalf("could not read config file: %v", err)
+	}
 
 	connStr := fmt.Sprintf("user=%s password=%s dbname=%s sslmode=disable",
 		config.GetString("database.user"),
 		config.GetString("database.password"),
 		config.GetString("database.database"))
 
-	db, err := sql.Open("postgres", connStr)
+	db, err := gorm.Open(postgres.Open(connStr), &gorm.Config{})
+	if err != nil {
+		log.Fatalf("could not connect to database: %v", err)
+	}
+
+	// Mengambil pool koneksi dari GORM
+	sqlDB, err := db.DB()
 	helper.PanicIfError(err)
 
-	db.SetMaxIdleConns(5)
-	db.SetMaxOpenConns(20)
-	db.SetConnMaxIdleTime(60 * time.Minute)
-	db.SetConnMaxLifetime(60 * time.Minute)
+	// Mengatur parameter pool koneksi
+	sqlDB.SetMaxIdleConns(5)
+	sqlDB.SetMaxOpenConns(20)
+	sqlDB.SetConnMaxIdleTime(60 * time.Minute)
+	sqlDB.SetConnMaxLifetime(60 * time.Minute)
 	return db
 }
 
