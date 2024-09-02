@@ -28,12 +28,16 @@ func NewAuthServiceImpl(authRepository repository.AuthRepository, db *gorm.DB, v
 	}
 }
 
-func (service *AuthServiceImpl) Register(request web.UserRegisterRequest) string {
+func (service *AuthServiceImpl) Register(request web.UserRegisterRequest) (string, error) {
 	err := service.validate.Struct(request)
-	helper.PanicIfError(err)
+	if err != nil {
+		return "", err // Return the validation error
+	}
 
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(request.Password), bcrypt.DefaultCost)
-	helper.PanicIfError(err)
+	if err != nil {
+		return "", err // Return the error if hashing the password fails
+	}
 
 	user := domain.User{
 		Username: request.Username,
@@ -44,7 +48,10 @@ func (service *AuthServiceImpl) Register(request web.UserRegisterRequest) string
 		Photo:    request.Photo,
 	}
 
-	result := service.AuthRepository.Save(user)
+	result, err := service.AuthRepository.Save(user)
+	if err != nil {
+		return "", err // Return the error if the user already exists
+	}
 
 	// Create JWT token and include user data in the claims
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
@@ -60,5 +67,35 @@ func (service *AuthServiceImpl) Register(request web.UserRegisterRequest) string
 	tokenString, err := token.SignedString([]byte(os.Getenv("SECRET")))
 	helper.PanicIfError(err)
 
-	return tokenString
+	return tokenString, nil
+}
+
+func (service *AuthServiceImpl) Login(request web.UserLoginRequest) (string, error) {
+	err := service.validate.Struct(request)
+	if err != nil {
+		return "", err // Return the validation error
+	}
+
+	user, err := service.AuthRepository.FindByEmailAndPassword(request.Email, request.Password)
+	if err != nil {
+		return "", err // Return the error if the user is not found or password is incorrect
+	}
+
+	// Create JWT token and include user data in the claims
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"sub":      user.ID,
+		"username": user.Username,
+		"email":    user.Email,
+		"name":     user.Name,
+		"phone":    user.Phone,
+		"photo":    user.Photo,
+		"exp":      time.Now().Add(time.Hour * 24 * 7).Unix(),
+	})
+
+	tokenString, err := token.SignedString([]byte(os.Getenv("SECRET")))
+	if err != nil {
+		return "", err // Return the error if signing the token fails
+	}
+
+	return tokenString, nil
 }

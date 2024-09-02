@@ -7,9 +7,10 @@ import (
 )
 
 func NewRouter(authController controller.AuthController) *fiber.App {
-	app := fiber.New()
+	router := fiber.New()
 
-	app.Post("/api/register", authController.Register)
+	router.Post("/api/register", authController.Register)
+	router.Post("/api/login", authController.Login)
 
-	return app
+	return router
 }

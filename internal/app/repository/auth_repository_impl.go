@@ -2,8 +2,8 @@ package repository
 
 import (
 	"martpedia-backend/internal/app/model/domain"
-	"martpedia-backend/internal/pkg/helper"
 
+	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 )
 
@@ -17,7 +17,7 @@ func NewAuthRepositoryImpl(db *gorm.DB) AuthRepository {
 	}
 }
 
-func (repository *AuthRepositoryImpl) Save(user domain.User) domain.User {
+func (repository *AuthRepositoryImpl) Save(user domain.User) (domain.User, error) {
 	user = domain.User{
 		Username: user.Username,
 		Email:    user.Email,
@@ -27,7 +27,25 @@ func (repository *AuthRepositoryImpl) Save(user domain.User) domain.User {
 	}
 
 	response := repository.DB.Create(&user)
-	helper.PanicIfError(response.Error)
+	if response != nil {
+		return user, response.Error
+	}
 
-	return user
+	return user, nil
+}
+
+func (repository *AuthRepositoryImpl) FindByEmailAndPassword(email string, password string) (domain.User, error) {
+	var user domain.User
+
+	response := repository.DB.Where("email = ?", email).First(&user)
+	if response.Error != nil {
+		return user, response.Error
+	}
+
+	err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
+	if err != nil {
+		return user, err
+	}
+
+	return user, nil
 }
