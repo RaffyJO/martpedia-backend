@@ -26,13 +26,18 @@ func InitializedServer() *fiber.App {
 	validate := ProvideValidator()
 	authService := service.NewAuthServiceImpl(authRepository, gormDB, validate)
 	authController := controller.NewAuthControllerImpl(authService)
-	app := router.NewRouter(authController)
+	addressRepository := repository.NewAddressRepositoryImpl(gormDB)
+	addressService := service.NewAddressServiceImpl(addressRepository, gormDB, validate)
+	addressController := controller.NewAddressControllerImpl(addressService)
+	app := router.NewRouter(authController, addressController)
 	return app
 }
 
 // injector.go:
 
 var authSet = wire.NewSet(repository.NewAuthRepositoryImpl, service.NewAuthServiceImpl, controller.NewAuthControllerImpl)
+
+var addressSet = wire.NewSet(repository.NewAddressRepositoryImpl, service.NewAddressServiceImpl, controller.NewAddressControllerImpl)
 
 // ProvideValidator creates and returns a new validator instance
 func ProvideValidator() *validator.Validate {

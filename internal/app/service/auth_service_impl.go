@@ -4,7 +4,6 @@ import (
 	"martpedia-backend/internal/app/model/domain"
 	"martpedia-backend/internal/app/model/web"
 	"martpedia-backend/internal/app/repository"
-	"martpedia-backend/internal/pkg/helper"
 	"os"
 	"time"
 
@@ -65,7 +64,9 @@ func (service *AuthServiceImpl) Register(request web.UserRegisterRequest) (strin
 	})
 
 	tokenString, err := token.SignedString([]byte(os.Getenv("SECRET")))
-	helper.PanicIfError(err)
+	if err != nil {
+		return "", err // Return the error if signing the token fails
+	}
 
 	return tokenString, nil
 }

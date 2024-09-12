@@ -21,6 +21,12 @@ var authSet = wire.NewSet(
 	controller.NewAuthControllerImpl,
 )
 
+var addressSet = wire.NewSet(
+	repository.NewAddressRepositoryImpl,
+	service.NewAddressServiceImpl,
+	controller.NewAddressControllerImpl,
+)
+
 // ProvideValidator creates and returns a new validator instance
 func ProvideValidator() *validator.Validate {
 	v := validator.New()
@@ -33,6 +39,7 @@ func InitializedServer() *fiber.App {
 		db.NewDB,
 		ProvideValidator,
 		authSet,
+		addressSet,
 		router.NewRouter,
 	)
 	return nil

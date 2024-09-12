@@ -35,11 +35,11 @@ func NewDB() *gorm.DB {
 		log.Fatalf("could not connect to database: %v", err)
 	}
 
-	// Mengambil pool koneksi dari GORM
+	// Take the connection pool from GORM
 	sqlDB, err := db.DB()
 	helper.PanicIfError(err)
 
-	// Mengatur parameter pool koneksi
+	// Set the connection pool parameters
 	sqlDB.SetMaxIdleConns(5)
 	sqlDB.SetMaxOpenConns(20)
 	sqlDB.SetConnMaxIdleTime(60 * time.Minute)

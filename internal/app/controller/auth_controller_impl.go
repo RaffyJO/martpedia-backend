@@ -30,11 +30,11 @@ func (controller *AuthControllerImpl) Register(ctx *fiber.Ctx) error {
 
 	response, err := controller.AuthService.Register(userRegisterRequest)
 	if err != nil {
-		// Jika error adalah error validasi dari validator
+		// If the error is a validation error from the validator
 		if validationErrs, ok := err.(validator.ValidationErrors); ok {
 			var errors []string
 			for _, err := range validationErrs {
-				// Menyusun pesan error spesifik untuk setiap field
+				// Display specific error message for each field
 				errors = append(errors, fmt.Sprintf("Field validation for '%s' failed on the '%s' tag", err.Field(), err.Tag()))
 			}
 			return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{
@@ -43,7 +43,7 @@ func (controller *AuthControllerImpl) Register(ctx *fiber.Ctx) error {
 			})
 		}
 
-		// Jika error lain
+		// If an another error occurs
 		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"status":  "error",
 			"message": err.Error(),
@@ -70,11 +70,11 @@ func (controller *AuthControllerImpl) Login(ctx *fiber.Ctx) error {
 
 	response, err := controller.AuthService.Login(userLoginRequest)
 	if err != nil {
-		// Jika error adalah error validasi dari validator
+		// If the error is a validation error from the validator
 		if validationErrs, ok := err.(validator.ValidationErrors); ok {
 			var errors []string
 			for _, err := range validationErrs {
-				// Menyusun pesan error spesifik untuk setiap field
+				// Display specific error message for each field
 				errors = append(errors, fmt.Sprintf("Field validation for '%s' failed on the '%s' tag", err.Field(), err.Tag()))
 			}
 			return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{
@@ -83,7 +83,7 @@ func (controller *AuthControllerImpl) Login(ctx *fiber.Ctx) error {
 			})
 		}
 
-		// Jika error lain
+		// If an another error occurs
 		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"status":  "error",
 			"message": err.Error(),
