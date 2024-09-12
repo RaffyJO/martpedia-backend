@@ -16,6 +16,10 @@ func NewRouter(authController controller.AuthController, addressController contr
 	router.Post("/api/login", authController.Login)
 
 	router.Post("/api/address", middleware.RequiredAuth, addressController.Create)
+	router.Put("/api/address/:id", middleware.RequiredAuth, addressController.Update)
+	router.Delete("/api/address/:id", middleware.RequiredAuth, addressController.Delete)
+	router.Get("/api/address/:id", middleware.RequiredAuth, addressController.FindById)
+	router.Get("/api/address", middleware.RequiredAuth, addressController.FindAll)
 
 	return router
 }

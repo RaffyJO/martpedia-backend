@@ -37,3 +37,41 @@ func (repository *AddressRepositoryImpl) Save(address domain.Address) (domain.Ad
 
 	return address, nil
 }
+
+func (repository *AddressRepositoryImpl) Update(address domain.Address) (domain.Address, error) {
+	response := repository.DB.Model(&address).Where("id = ?", address.ID).Updates(address)
+	if response != nil {
+		return address, response.Error
+	}
+
+	return address, nil
+}
+
+func (repository *AddressRepositoryImpl) Delete(address domain.Address) error {
+	response := repository.DB.Delete(&address)
+	if response != nil {
+		return response.Error
+	}
+
+	return nil
+}
+
+func (repository *AddressRepositoryImpl) FindById(id int) (domain.Address, error) {
+	var address domain.Address
+	response := repository.DB.First(&address, id)
+	if response.Error != nil {
+		return address, response.Error
+	}
+
+	return address, nil
+}
+
+func (repository *AddressRepositoryImpl) FindAll(id int) ([]domain.Address, error) {
+	var addresses []domain.Address
+	response := repository.DB.Where("addressable_id = ?", id).Order("id asc").Find(&addresses)
+	if response.Error != nil {
+		return addresses, response.Error
+	}
+
+	return addresses, nil
+}
