@@ -38,7 +38,7 @@ func (service *AddressServiceImpl) Create(request web.UserAddressRequest) (web.U
 		State:           request.State,
 		PostalCode:      request.PostalCode,
 		Country:         request.Country,
-		AddressableID:   request.ID,
+		AddressableID:   request.AddressableID,
 		AddressableType: request.AddressableType,
 	}
 

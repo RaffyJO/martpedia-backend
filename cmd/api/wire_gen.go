@@ -29,7 +29,10 @@ func InitializedServer() *fiber.App {
 	addressRepository := repository.NewAddressRepositoryImpl(gormDB)
 	addressService := service.NewAddressServiceImpl(addressRepository, gormDB, validate)
 	addressController := controller.NewAddressControllerImpl(addressService)
-	app := router.NewRouter(authController, addressController)
+	storeRepository := repository.NewStoreRepositoryImpl(gormDB)
+	storeService := service.NewStoreServiceImpl(storeRepository, gormDB, validate, addressService)
+	storeController := controller.NewStoreControllerImpl(storeService)
+	app := router.NewRouter(authController, addressController, storeController)
 	return app
 }
 
@@ -38,6 +41,8 @@ func InitializedServer() *fiber.App {
 var authSet = wire.NewSet(repository.NewAuthRepositoryImpl, service.NewAuthServiceImpl, controller.NewAuthControllerImpl)
 
 var addressSet = wire.NewSet(repository.NewAddressRepositoryImpl, service.NewAddressServiceImpl, controller.NewAddressControllerImpl)
+
+var storeSet = wire.NewSet(repository.NewStoreRepositoryImpl, service.NewStoreServiceImpl, controller.NewStoreControllerImpl)
 
 // ProvideValidator creates and returns a new validator instance
 func ProvideValidator() *validator.Validate {

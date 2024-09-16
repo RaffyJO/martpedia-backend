@@ -9,5 +9,6 @@ type UserAddressRequest struct {
 	State           string `json:"state"`
 	PostalCode      string `json:"postal_code" validate:"required,min=3,max=100"`
 	Country         string `json:"country" validate:"required,min=3,max=100"`
-	AddressableType string `json:"addressable_type" validate:"required,oneof=user store"`
+	AddressableID   int    `json:"addressable_id"`
+	AddressableType string `json:"addressable_type"`
 }

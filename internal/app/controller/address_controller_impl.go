@@ -34,7 +34,7 @@ func (controller *AddressControllerImpl) Create(ctx *fiber.Ctx) error {
 	user := ctx.Locals("user").(domain.User)
 
 	// Include the user ID in the request body
-	userAddressRequest.ID = user.ID
+	userAddressRequest.AddressableID = user.ID
 
 	response, err := controller.AddressService.Create(userAddressRequest)
 	if err != nil {
